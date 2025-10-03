@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Status Board</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a202c">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use the Inter font family for a modern look */
+        body { 
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Simple scrollbar styling for a more integrated look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #718096;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <!-- Background gradient effect for visual appeal -->
+    <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center z-0" style="background-image: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.1), transparent 40%), radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1), transparent 40%);"></div>
+    
+    <!-- Main content container -->
+    <div class="relative min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 md:p-8 z-10">
+        <div class="w-full max-w-7xl mx-auto">
+            
+            <header class="text-center mb-8 mt-4">
+                <!-- Responsive header text for different screen sizes -->
+                <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold tracking-wider text-white uppercase drop-shadow-lg">Unit Status</h1>
+                <p class="text-lg sm:text-xl md:text-2xl text-teal-400 mt-2">Live Status Board</p>
+            </header>
+
+            <main>
+                <!-- Container for the data table -->
+                <div id="table-container" class="bg-gray-800/60 backdrop-blur-xl border border-gray-700/50 rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-900/50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-teal-400 uppercase tracking-wider">Unit</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-teal-400 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-teal-400 uppercase tracking-wider">Location</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-teal-400 uppercase tracking-wider">Comments</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-teal-400 uppercase tracking-wider">Reported</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-gray-700">
+                                <!-- Data rows will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <!-- Container for the 'No Data' message -->
+                <div id="no-data-container" class="hidden">
+                    <!-- JS will populate this if needed -->
+                </div>
+            </main>
+
+            <footer class="text-center mt-12 text-sm sm:text-base text-gray-500">
+                <p id="last-updated">Last updated: --</p>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration for the Google Sheet data source
+        const CONFIG = {
+            maintenanceSheetUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR60gVCujM1LPmtNNY4zhmIZK7POkotqx4meDzt4rdjz_mT3kwqnn5YTn0MFF9adxYgqZcWBDMADuze/pub?gid=1714038258&single=true&output=csv',
+            cacheDurationMinutes: 5 // How often to refresh the data
+        };
+
+        /**
+         * Parses CSV text into an array of objects. Handles newlines and escaped quotes within fields.
+         * @param {string} text The raw CSV text.
+         * @returns {Array<Object>} An array of objects representing the rows.
+         */
+        function parseCSV(text) {
+            const rows = [];
+            let fields = [];
+            let field = '';
+            let inQuotes = false;
+            // Normalize line endings and trim whitespace
+            const normalizedText = text.replace(/\r\n/g, '\n').trim();
+
+            for (let i = 0; i < normalizedText.length; i++) {
+                const char = normalizedText[i];
+
+                if (inQuotes) {
+                    if (char === '"') {
+                        // Handle escaped double-quotes ("")
+                        if (i + 1 < normalizedText.length && normalizedText[i + 1] === '"') {
+                            field += '"';
+                            i++; // Skip the second quote
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        field += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        fields.push(field);
+                        field = '';
+                    } else if (char === '\n') {
+                        fields.push(field);
+                        rows.push(fields);
+                        fields = [];
+                        field = '';
+                    } else {
+                        field += char;
+                    }
+                }
+            }
+            // Add the last field and row
+            fields.push(field);
+            rows.push(fields);
+
+            const headerRow = rows.shift().map(h => h.trim().replace(/^"|"$/g, ''));
+            
+            return rows.map(row => {
+                const obj = {};
+                headerRow.forEach((header, index) => {
+                    obj[header] = row[index] || '';
+                });
+                return obj;
+            }).filter(item => item.Unit && item.Unit.trim() !== ''); // Filter out empty rows
+        }
+
+        /**
+         * Fetches and parses data from the specified Google Sheet URL.
+         * @param {string} url The Google Sheet CSV URL.
+         * @param {string} key Not used, kept for compatibility.
+         * @param {function} callback The function to call with the parsed data.
+         */
+        async function loadSheetData(url, key, callback) {
+            console.log("Fetching data from Google Sheet...");
+            try {
+                // Add a cache-busting parameter to avoid stale data
+                const fetchUrl = `${url}&t=${new Date().getTime()}`;
+                const response = await fetch(fetchUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+                callback(data);
+            } catch (error) {
+                console.error("Failed to load or parse sheet data:", error);
+                callback([]); // Pass an empty array on error
+            }
+        }
+
+        /**
+         * Creates a status indicator with a colored dot based on status text.
+         * @param {string} statusText The status text from the data.
+         * @returns {string} HTML string for the status element.
+         */
+        function getStatusIndicator(statusText) {
+            const status = (statusText || '').trim().toLowerCase();
+            let dotColor = 'bg-gray-500'; // Default color
+            let textColor = 'text-gray-300';
+
+            if (status.includes('in service')) {
+                dotColor = 'bg-green-500';
+                textColor = 'text-green-300';
+            } else if (status.includes('oos')) {
+                dotColor = 'bg-red-500';
+                textColor = 'text-red-300';
+            } else if (status.length > 0) { // Any other status
+                dotColor = 'bg-yellow-500';
+                textColor = 'text-yellow-300';
+            }
+
+            const formattedStatus = statusText ? statusText.charAt(0).toUpperCase() + statusText.slice(1) : 'N/A';
+
+            return `
+                <div class="flex items-center">
+                    <span class="h-3 w-3 rounded-full ${dotColor} mr-3 flex-shrink-0"></span>
+                    <span class="font-semibold ${textColor}">${formattedStatus}</span>
+                </div>
+            `;
+        }
+
+        /**
+         * Renders the data into a table on the webpage.
+         * @param {Array<Object>} maintenanceData The data fetched from the sheet.
+         */
+        function displayData(maintenanceData) {
+            const tableContainer = document.getElementById('table-container');
+            const tableBody = document.getElementById('table-body');
+            const noDataContainer = document.getElementById('no-data-container');
+
+            // Clear previous state
+            tableBody.innerHTML = '';
+            noDataContainer.innerHTML = '';
+
+            if (!maintenanceData || maintenanceData.length === 0) {
+                tableContainer.classList.add('hidden');
+                noDataContainer.classList.remove('hidden');
+                noDataContainer.innerHTML = `
+                    <div class="bg-gray-800/60 backdrop-blur-xl rounded-xl border border-gray-700/50 p-8 sm:p-12 text-center">
+                        <svg class="mx-auto h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="mt-4 text-xl font-medium text-gray-300">No Data Available</h3>
+                        <p class="mt-2 text-base text-gray-500">Could not find any maintenance records.</p>
+                    </div>`;
+                return;
+            }
+            
+            // Restore table view if it was hidden
+            tableContainer.classList.remove('hidden');
+            noDataContainer.classList.add('hidden');
+
+            // Sort data: OOS first, then by most recent date
+            maintenanceData.sort((a, b) => {
+                const statusA = (a.Status || '').trim().toLowerCase();
+                const statusB = (b.Status || '').trim().toLowerCase();
+                
+                const isA_OOS = statusA.includes('oos');
+                const isB_OOS = statusB.includes('oos');
+
+                if (isA_OOS && !isB_OOS) {
+                    return -1; // a comes first
+                }
+                if (!isA_OOS && isB_OOS) {
+                    return 1; // b comes first
+                }
+
+                // If statuses are the same (both OOS or both not), sort by date
+                return new Date(b.Reported) - new Date(a.Reported);
+            });
+
+            maintenanceData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                // Alternate row background color for better readability
+                const bgColor = index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-800/50';
+                row.className = `${bgColor} hover:bg-gray-700/60 transition-colors duration-200`;
+                
+                // Format the reported date for display
+                const reportedDate = item.Reported ? new Date(item.Reported) : null;
+                const dateString = reportedDate && !isNaN(reportedDate) ? reportedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A';
+                
+                const sanitizedComments = item.Comments ? item.Comments.replace(/"/g, '&quot;') : '';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">${item.Unit || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${getStatusIndicator(item.Status)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${item.Location || 'N/A'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-300 max-w-xs truncate" title="${sanitizedComments}">${item.Comments || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-400">${dateString}</td>
+                `;
+                tableBody.appendChild(row);
+});
+            updateTimestamp();
+        }
+        
+        /**
+         * Updates the "Last updated" timestamp in the footer.
+         */
+        function updateTimestamp() {
+            const el = document.getElementById('last-updated');
+            if (el) {
+                const now = new Date();
+                const options = {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                };
+                el.textContent = `Last updated: ${now.toLocaleString(navigator.language, options)}`;
+            }
+        }
+
+        /**
+         * Wrapper function to load and refresh the data from the sheet.
+         */
+        function refreshData() {
+            loadSheetData(CONFIG.maintenanceSheetUrl, 'maintenanceData', displayData);
+        }
+
+        // Initial data load when the page is ready
+        document.addEventListener('DOMContentLoaded', refreshData);
+        // Set up a timer to periodically refresh the data
+        setInterval(refreshData, (CONFIG.cacheDurationMinutes || 5) * 60 * 1000);
+    </script>
+</body>
+</html>
+
+
+
