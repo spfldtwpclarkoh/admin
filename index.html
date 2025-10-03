@@ -8,6 +8,17 @@
     
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FullCalendar Core and iCalendar Plugin -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/icalendar@6.1.8/index.global.min.js'></script>
+
     <style>
         /* Custom styles for a nice background and centered content */
         body {
@@ -18,6 +29,48 @@
             height: 90vh; /* Adjust height as needed */
             border: none;
         }
+        /* Custom styles for FullCalendar list items */
+        .fc-list-event {
+            transition: background-color 0.2s ease-in-out;
+            border-radius: 0.75rem; /* rounded-xl */
+            margin-bottom: 0.75rem;
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+        }
+        .fc-list-event:hover {
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+        .fc .fc-list-event-dot {
+            border-color: #3b82f6; /* A nice blue color */
+        }
+        /* Style for the date headers in the list view */
+        .fc .fc-list-day-cushion {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            padding: 0.5rem 1rem;
+        }
+        .fc-list-day-text, .fc-list-day-side-text {
+            font-weight: 600; /* font-semibold */
+            color: #4b5563; /* text-gray-600 for better contrast */
+        }
+        /* Hide calendar "No events" text until loading is complete */
+        .fc-list-empty {
+            display: none;
+        }
+
+        /* Dark mode styles for FullCalendar */
+        @media (prefers-color-scheme: dark) {
+            .fc-list-event {
+                border-color: #374151; /* dark:border-gray-700 */
+            }
+            .fc-list-event:hover {
+                background-color: #374151; /* dark:hover:bg-gray-700 */
+            }
+            .fc .fc-list-day-cushion {
+                 background-color: #374151; /* dark:bg-gray-700 */
+            }
+            .fc-list-day-text, .fc-list-day-side-text {
+                color: #d1d5db; /* dark:text-gray-300 */
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -26,12 +79,7 @@
 
         <!-- Logo -->
         <div class="flex justify-center mb-4">
-            <!-- 
-              IMPORTANT: Replace the src attribute below with the path to your logo file. 
-              For example, if your logo is named "logo.png" and is in the same folder, 
-              you would write: src="logo.png"
-            -->
-            <img src="./images/logo.png" alt="Company Logo" class="h-48">
+            <img src="./images/logo.png" alt="Company Logo" class="h-48" onerror="this.onerror=null;this.src='https://placehold.co/300x200/cccccc/333333?text=Logo';">
         </div>
         
         <!-- Header Section -->
@@ -45,7 +93,7 @@
             <!-- Link 1: Fuel Form Viewer -->
             <a href="https://spfldtwpclarkoh.github.io/fuelform/viewer" class="app-link group transition-transform transform hover:-translate-y-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
-                    <img src="./images/entrys.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110">
+                    <img src="./images/entrys.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
                 </div>
                 <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FUEL ENTRYS</p>
             </a>
@@ -53,7 +101,7 @@
             <!-- Link 2: Fuel Form -->
             <a href="https://spfldtwpclarkoh.github.io/fuelform" class="app-link group transition-transform transform hover:-translate-y-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
-                    <img src="./images/fuel.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110">
+                    <img src="./images/fuel.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
                 </div>
                  <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FUEL FORM</p>
             </a>
@@ -61,7 +109,7 @@
             <!-- Link 3: Disp Map -->
             <a href="https://ago.clarkcountyohio.gov/sheriffdispatch/" class="app-link group transition-transform transform hover:-translate-y-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
-                    <img src="./images/dispmap.png" alt="Dispatch Map Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110">
+                    <img src="./images/dispmap.png" alt="Dispatch Map Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
                 </div>
                 <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">DISPATCH MAP</p>
             </a>
@@ -69,29 +117,116 @@
             <!-- Link 4: Unit Status -->
             <a href="unitstatus.html" class="app-link group transition-transform transform hover:-translate-y-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
-                    <img src="./images/unitstatus.png" alt="Ticker Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110">
+                    <img src="./images/unitstatus.png" alt="Ticker Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
                 </div>
                 <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">UNIT STATUS</p>
             </a>
 
-            <!-- Link 5: Manual Alert -->
-            <a href="https://spfldtwpclarkoh.github.io/fuelform/viewer" class="app-link group transition-transform transform hover:-translate-y-2">
+            <!-- Link 5: News & Announcements -->
+            <a href="news.html" class="app-link group transition-transform transform hover:-translate-y-2">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
-                    <img src="./images/fuel.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110">
+                    <img src="./images/news.png" alt="News Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
                 </div>
-                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FUEL ENTRYS</p>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">NEWS</p>
+            </a>
+
+            <!-- Link 6: ESO Link (Opens in new tab) -->
+            <a href="https://www.esosuite.net/login/" target="_blank" rel="noopener noreferrer" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/eso.png" alt="ESO Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">ESO</p>
             </a>
 
         </div>
 
+        <br>
+
+                <!-- 2nd Line Icon Container -->
+        <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+
+            <!-- Link 1: Aladtec -->
+            <a href="https://secure13.aladtec.com/springfieldtwpfire/" target="_blank" rel="noopener noreferrer" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/aladtec.png" alt="Aladtec Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">ALADTEC</p>
+            </a>
+
+            <!-- Link 2: First Arriving Sheets -->
+            <a href="https://docs.google.com/spreadsheets/d/1TLiOoVAvriGP_Jb5BjbxmMARNkYBmoPOf7qWEmdmXzw/edit?gid=631251253#gid=631251253" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/sheets.png" alt="Fuel Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                 <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FA SPREADSHEET</p>
+            </a>
+
+            <!-- Link 3: First Arriving Slides -->
+            <a href="https://docs.google.com/presentation/d/1NcL_EUgFAl3uys0ovJwuUrLEiSnSGB6RWZUpyaT4WFE/edit?slide=id.gf5d4e4c19d_2_45#slide=id.gf5d4e4c19d_2_45" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/slides.png" alt="Dispatch Map Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FA POWERPOINT</p>
+            </a>
+
+            <!-- Link 4: First Arriving Dashboard -->
+            <a href="https://portal.firstarrivingdigital.com/login" target="_blank" rel="noopener noreferrer" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/firstarriving.png" alt="FA Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">FIRST ARRIVING</p>
+            </a>
+
+            <!-- Link 5: News & Announcements -->
+            <a href="news.html" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/news.png" alt="News Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">NEWS</p>
+            </a>
+
+            <!-- Link 6: ESO Link (Opens in new tab) -->
+            <a href="https://www.esosuite.net/login/" target="_blank" rel="noopener noreferrer" class="app-link group transition-transform transform hover:-translate-y-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 w-32 h-32 flex items-center justify-center">
+                    <img src="./images/eso.png" alt="ESO Icon" class="w-16 h-16 object-contain transition-transform group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/333333?text=Icon';">
+                </div>
+                <p class="text-center mt-3 font-semibold text-gray-700 dark:text-gray-300">ESO</p>
+            </a>
+
+        </div>
+
+        <!-- Upcoming Events Widget -->
+        <div class="w-full max-w-4xl mx-auto mt-16">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Upcoming Events</h2>
+                </div>
+                
+                <!-- Loading Spinner -->
+                <div id="loading" class="text-center text-gray-500 p-8">
+                     <div class="flex items-center justify-center space-x-2">
+                        <div class="w-4 h-4 rounded-full animate-pulse bg-blue-500"></div>
+                        <div class="w-4 h-4 rounded-full animate-pulse bg-blue-500" style="animation-delay: 0.2s;"></div>
+                        <div class="w-4 h-4 rounded-full animate-pulse bg-blue-500" style="animation-delay: 0.4s;"></div>
+                    </div>
+                    <p class="mt-4 dark:text-gray-400">Loading events...</p>
+                </div>
+    
+                <!-- Calendar will be injected here -->
+                <div id="calendar" class="p-2 sm:p-4"></div>
+            </div>
+        </div>
+
+
         <div id="responseMessage" class="text-center text-sm mt-4"></div>
 
-        <footer class="text-center pt-4 text-gray-500 text-sm border-t border-gray-200">
+        <footer class="text-center pt-16 pb-8 text-gray-500 text-sm">
             Created by TFrank615
         </footer>
         
     </div>
 
+    <!-- IFrame container for links -->
     <div id="iframe-container" class="hidden p-4">
         <button id="backButton" class="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
             &larr; Back to Admin Home
@@ -99,6 +234,7 @@
         <iframe id="contentFrame"></iframe>
     </div>
 
+    <!-- Script for link navigation -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const mainContent = document.getElementById('main-content');
@@ -109,6 +245,12 @@
 
             appLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
+                    // If the link is meant to open in a new tab, let the browser handle it
+                    if (link.getAttribute('target') === '_blank') {
+                        return;
+                    }
+                    
+                    // Otherwise, open it in the iframe
                     e.preventDefault();
                     const url = link.getAttribute('href');
                     
@@ -125,6 +267,60 @@
                 mainContent.classList.remove('hidden');
                 contentFrame.src = 'about:blank'; // Clear the iframe
             });
+        });
+    </script>
+
+    <!-- Script for Events Calendar Widget -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const loadingEl = document.getElementById('loading');
+            
+            // The public iCal URL from Google Calendar
+            const calendarUrl = 'https://calendar.google.com/calendar/ical/3m020nl2nsv2dslfon9jc723v4hbcm55%40import.calendar.google.com/public/basic.ics';
+            
+            // We use a CORS proxy to bypass browser security restrictions.
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const icalUrl = proxyUrl + encodeURIComponent(calendarUrl);
+
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'listYear', // Display events in a list format for the year
+                headerToolbar: false, // Hide the default header
+                height: 'auto', // Auto height based on content
+                validRange: {
+                    start: new Date() // Ensures only today and future dates are shown
+                },
+                events: {
+                    url: icalUrl,
+                    format: 'ics'
+                },
+                // Hide loading spinner when events are loaded
+                loading: function(isLoading) {
+                    if (!isLoading) {
+                        loadingEl.style.display = 'none';
+                        // Show the "no events" message if it exists
+                        const emptyEl = calendarEl.querySelector('.fc-list-empty');
+                        if(emptyEl) {
+                           emptyEl.style.display = 'block';
+                           emptyEl.innerHTML = '<div class="text-center p-8"><h3 class="font-medium text-gray-700 dark:text-gray-200">All Clear!</h3><p class="text-gray-500 dark:text-gray-400">There are no upcoming events.</p></div>';
+                        }
+                    } else {
+                        loadingEl.style.display = 'block';
+                    }
+                },
+                // Customize how each event is rendered
+                eventContent: function(arg) {
+                    return {
+                        html: `<div class="p-3">
+                                <div class="font-semibold text-gray-800 dark:text-gray-100">${arg.event.title}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${arg.timeText}</div>
+                               </div>`
+                    };
+                }
+            });
+
+            calendar.render();
         });
     </script>
 
