@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STFD Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .link-item:hover .handle { opacity: 1; }
+        .tab-btn.active {
+            border-bottom-color: #DC2626;
+            color: #1F2937;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Config Error Section -->
+    <div id="config-error-section" class="hidden flex items-center justify-center h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg text-center">
+            <h1 class="text-2xl font-bold text-red-600 mb-4">Firebase Configuration Error</h1>
+            <p class="text-gray-700">
+                Your Firebase configuration seems to be missing. Please open <code class="bg-gray-200 p-1 rounded">admin.html</code> and replace the placeholder values within the <code class="bg-gray-200 p-1 rounded">firebaseConfig</code> object with your actual Firebase project credentials.
+            </p>
+        </div>
+    </div>
+
+    <!-- Login Section -->
+    <div id="login-section" class="flex items-center justify-center h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+            <h1 class="text-2xl font-bold text-center mb-6">Admin Login</h1>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                <input type="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="******************">
+            </div>
+            <button id="login-btn" class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                Login
+            </button>
+            <p id="login-error" class="text-red-500 text-xs italic mt-4 text-center hidden">Incorrect password.</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel Section -->
+    <div id="admin-panel" class="hidden container mx-auto p-4 sm:p-8">
+        <h1 class="text-4xl font-bold mb-6">Website Content Management</h1>
+
+        <!-- Tabs Navigation -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                <button class="tab-btn active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="main-webpage">
+                    Main WebPage
+                </button>
+                <button class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="community-outreach">
+                    Community Outreach
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main WebPage Tab Content -->
+        <div id="main-webpage-panel" class="tab-panel">
+            <!-- Alert Banner Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Alert Banner</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="burn-status-select" class="block text-sm font-medium text-gray-700">Burn Ban Status</label>
+                        <select id="burn-status-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
+                            <option value="none">No Banner</option>
+                            <option value="IN EFFECT">IN EFFECT</option>
+                            <option value="NOT IN EFFECT">NOT IN EFFECT</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="alert-text-input" class="block text-sm font-medium text-gray-700">Additional Alert Text</label>
+                        <input type="text" id="alert-text-input" class="mt-1 focus:ring-red-500 focus:border-red-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="Please do not burn.">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Links Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Header Navigation Links</h2>
+                <p class="text-gray-600 mb-4">Drag and drop to reorder links.</p>
+                <div id="links-container" class="space-y-4">
+                    <!-- Main page links will be dynamically inserted here -->
+                </div>
+                <button id="add-link-btn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                    <i class="fas fa-plus mr-2"></i>Add New Link
+                </button>
+            </div>
+        </div>
+
+        <!-- Community Outreach Tab Content -->
+        <div id="community-outreach-panel" class="tab-panel hidden">
+             <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Header Navigation Links</h2>
+                <p class="text-gray-600 mb-4">Manage the navigation links for the Community Outreach page. Drag and drop to reorder.</p>
+                <div id="community-links-container" class="space-y-4">
+                    <!-- Community page links will be dynamically inserted here -->
+                </div>
+                <button id="add-community-link-btn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                    <i class="fas fa-plus mr-2"></i>Add New Link
+                </button>
+            </div>
+        </div>
+        
+        <div class="flex justify-end mt-8">
+            <button id="save-btn" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
+                Save All Changes
+            </button>
+        </div>
+        
+        <div id="toast-notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg hidden animate-pulse">
+            Content saved successfully!
+        </div>
+
+    </div>
+
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DOM Elements ---
+        const loginSection = document.getElementById('login-section');
+        const adminPanel = document.getElementById('admin-panel');
+        const configErrorSection = document.getElementById('config-error-section');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const loginError = document.getElementById('login-error');
+        const burnStatusSelect = document.getElementById('burn-status-select');
+        const alertTextInput = document.getElementById('alert-text-input');
+        const saveBtn = document.getElementById('save-btn');
+        const toast = document.getElementById('toast-notification');
+        
+        // Main Page Links
+        const linksContainer = document.getElementById('links-container');
+        const addLinkBtn = document.getElementById('add-link-btn');
+        
+        // Community Page Links
+        const communityLinksContainer = document.getElementById('community-links-container');
+        const addCommunityLinkBtn = document.getElementById('add-community-link-btn');
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDjyl2w-HAUUSJa7wy78b9q4XOaUUaMojo",
+          authDomain: "stfd-website.firebaseapp.com",
+          projectId: "stfd-website",
+          storageBucket: "stfd-website.firebasestorage.app",
+          messagingSenderId: "52225510209",
+          appId: "1:52225510209:web:27d5b5846acedf55adefc0",
+          measurementId: "G-FL35VMGQ9F"
+        };
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-stfd-website';
+
+        // --- Validate Firebase Config ---
+        if (firebaseConfig.projectId === "YOUR_PROJECT_ID" || !firebaseConfig.projectId) {
+            loginSection.classList.add('hidden');
+            configErrorSection.classList.remove('hidden');
+            throw new Error("Firebase config is not set.");
+        }
+
+        // --- Initialize Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Simple Password ---
+        const ADMIN_PASS = "stfd2024!";
+
+        // --- Login Logic ---
+        loginBtn.addEventListener('click', () => {
+            if (passwordInput.value === ADMIN_PASS) {
+                loginSection.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                loadContent();
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+        passwordInput.addEventListener('keyup', (event) => {
+             if (event.key === 'Enter') loginBtn.click();
+        });
+
+        // --- Tab Switching Logic ---
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const targetPanelId = tab.getAttribute('data-tab');
+                panels.forEach(panel => {
+                    if (panel.id === `${targetPanelId}-panel`) {
+                        panel.classList.remove('hidden');
+                    } else {
+                        panel.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // --- Firestore Document Reference ---
+        const contentRef = doc(db, 'artifacts', appId, 'public', 'siteContent');
+        
+        // --- Generic Link Management ---
+        const createLinkInput = (link = { text: '', href: '' }, container) => {
+            const div = document.createElement('div');
+            div.className = 'link-item flex items-center space-x-3 bg-gray-50 p-3 rounded-md border';
+            div.setAttribute('draggable', 'true');
+            div.innerHTML = `
+                <i class="fas fa-grip-vertical handle text-gray-400 cursor-move opacity-0 transition-opacity"></i>
+                <input type="text" value="${link.text}" class="link-text-input flex-grow shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Link Text (e.g., Home)">
+                <input type="text" value="${link.href}" class="link-href-input flex-grow shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="URL (e.g., #home)">
+                <button class="remove-link-btn bg-red-600 hover:bg-red-700 text-white p-2 rounded-md"><i class="fas fa-trash"></i></button>
+            `;
+            div.querySelector('.remove-link-btn').addEventListener('click', () => div.remove());
+            container.appendChild(div);
+        };
+        
+        addLinkBtn.addEventListener('click', () => createLinkInput(undefined, linksContainer));
+        addCommunityLinkBtn.addEventListener('click', () => createLinkInput(undefined, communityLinksContainer));
+        
+        // --- Drag and Drop Setup ---
+        function setupDragAndDrop(container) {
+            let draggedItem = null;
+            container.addEventListener('dragstart', e => {
+                draggedItem = e.target.closest('.link-item');
+                if(draggedItem) setTimeout(() => draggedItem.classList.add('invisible'), 0);
+            });
+             container.addEventListener('dragend', e => {
+                 const item = e.target.closest('.link-item');
+                 if(item) item.classList.remove('invisible');
+            });
+            container.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(container, e.clientY);
+                if (draggedItem) {
+                    if (afterElement == null) {
+                        container.appendChild(draggedItem);
+                    } else {
+                        container.insertBefore(draggedItem, afterElement);
+                    }
+                }
+            });
+        }
+        
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.link-item:not(.invisible)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        setupDragAndDrop(linksContainer);
+        setupDragAndDrop(communityLinksContainer);
+
+        // --- Load Content from Firestore ---
+        async function loadContent() {
+            try {
+                const docSnap = await getDoc(contentRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    burnStatusSelect.value = data.burnStatus || 'none';
+                    alertTextInput.value = data.alertText || '';
+                    
+                    // Load Main links
+                    linksContainer.innerHTML = ''; 
+                    if (data.links && Array.isArray(data.links)) {
+                        data.links.forEach(link => createLinkInput(link, linksContainer));
+                    }
+                    
+                    // Load Community links
+                    communityLinksContainer.innerHTML = '';
+                     if (data.communityLinks && Array.isArray(data.communityLinks)) {
+                        data.communityLinks.forEach(link => createLinkInput(link, communityLinksContainer));
+                    }
+
+                } else {
+                     console.log("No content document found. A new one will be created on save.");
+                }
+            } catch (e) {
+                console.error("Error loading document: ", e);
+            }
+        }
+
+        // --- Save Content to Firestore ---
+        saveBtn.addEventListener('click', async () => {
+            const getLinksFromContainer = (container) => {
+                const links = [];
+                container.querySelectorAll('.link-item').forEach(item => {
+                    const text = item.querySelector('.link-text-input').value.trim();
+                    const href = item.querySelector('.link-href-input').value.trim();
+                    if (text && href) links.push({ text, href });
+                });
+                return links;
+            };
+
+            const dataToSave = {
+                burnStatus: burnStatusSelect.value,
+                alertText: alertTextInput.value,
+                links: getLinksFromContainer(linksContainer),
+                communityLinks: getLinksFromContainer(communityLinksContainer),
+            };
+
+            try {
+                await setDoc(contentRef, dataToSave, { merge: true });
+                showToast();
+            } catch (e) {
+                console.error("Error saving document: ", e);
+                alert("There was an error saving the content.");
+            }
+        });
+        
+        // --- Show Toast Notification ---
+        function showToast() {
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+    </script>
+</body>
+</html>
+
