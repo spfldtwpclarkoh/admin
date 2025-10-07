@@ -70,7 +70,7 @@
                         <select id="burn-status-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
                             <option value="none">No Banner</option>
                             <option value="IN EFFECT">IN EFFECT</option>
-                            <option value="NOT IN EFFECT">NOT IN EFFECT</option>
+                            <option value="LIFTED">LIFTED</option>
                         </select>
                     </div>
                     <div>
@@ -183,6 +183,15 @@
         });
         passwordInput.addEventListener('keyup', (event) => {
              if (event.key === 'Enter') loginBtn.click();
+        });
+
+        // --- Auto-fill Alert Text on Burn Ban Selection ---
+        burnStatusSelect.addEventListener('change', () => {
+            if (burnStatusSelect.value === 'IN EFFECT') {
+                alertTextInput.value = 'Please DO NOT Burn';
+            } else if (burnStatusSelect.value === 'LIFTED') {
+                alertTextInput.value = 'Please Burn Responsibly';
+            }
         });
 
         // --- Tab Switching Logic ---
@@ -329,4 +338,6 @@
     </script>
 </body>
 </html>
+
+
 
