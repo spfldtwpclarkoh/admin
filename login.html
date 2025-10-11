@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - STFD Admin</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
+            <div class="flex justify-center mb-6">
+                 <img src="./images/logo.png" alt="Company Logo" class="h-24" onerror="this.onerror=null;this.src='https://placehold.co/300x100/cccccc/333333?text=Logo';">
+            </div>
+            <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-200">Admin Login</h2>
+            <form id="loginForm" class="mt-8 space-y-6">
+                <div>
+                    <label for="username" class="sr-only">Username</label>
+                    <input id="username" name="username" type="text" autocomplete="username" required class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Username">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Password">
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Sign in
+                    </button>
+                </div>
+                <p id="errorMessage" class="text-center text-sm text-red-500 mt-2"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create a default admin user if no users exist
+            if (!localStorage.getItem('users')) {
+                const defaultUsers = [{ username: 'admin', password: 'password' }];
+                localStorage.setItem('users', JSON.stringify(defaultUsers));
+            }
+
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = e.target.username.value;
+                const password = e.target.password.value;
+                errorMessage.textContent = '';
+
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const foundUser = users.find(user => user.username === username && user.password === password);
+
+                if (foundUser) {
+                    // Use sessionStorage so login is cleared when tab is closed
+                    sessionStorage.setItem('loggedInUser', username);
+                    window.location.href = 'index.html';
+                } else {
+                    errorMessage.textContent = 'Invalid username or password.';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
