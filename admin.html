@@ -36,90 +36,145 @@
                 <input id="newPassword" type="password" placeholder="Password" required class="flex-grow appearance-none rounded-lg w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">Add User</button>
             </form>
-             <p id="addUserMessage" class="text-sm text-green-500 mt-2"></p>
+             <p id="addUserMessage" class="text-sm mt-2"></p>
         </div>
 
         <!-- User List -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
              <h2 class="text-xl font-semibold mb-4">Current Users</h2>
              <div id="userList" class="space-y-3">
-                <!-- Users will be dynamically inserted here -->
+                <p class="text-gray-500">Loading users...</p>
              </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loggedInUser = sessionStorage.getItem('loggedInUser');
-            // This page is for admins only
-            if (loggedInUser !== 'admin') {
-                alert('Access denied. You must be an admin to view this page.');
-                window.location.href = 'index.html';
-                return;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Page Access Control ---
+        const loggedInUser = sessionStorage.getItem('loggedInUser');
+        if (loggedInUser !== 'admin') {
+            // Use a simple message instead of alert()
+            document.body.innerHTML = `<div class="text-center p-8 text-red-500">Access Denied. You must be an admin to view this page. <a href="index.html" class="text-blue-500">Go back</a>.</div>`;
+        } else {
+             // --- Firebase Initialization ---
+            const firebaseConfig = {
+                apiKey: "AIzaSyAJkUZK6uSj3baYUmYel5A7BloGkyhhZLM",
+                authDomain: "stfd-web-creds.firebaseapp.com",
+                projectId: "stfd-web-creds",
+                storageBucket: "stfd-web-creds.firebasestorage.app",
+                messagingSenderId: "334765692543",
+                appId: "1:334765692543:web:f154d1402b73f4df63914a",
+                measurementId: "G-1SGKNVV8M7"
+            };
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+            setLogLevel('debug');
+            
+            const usersCollectionPath = `/artifacts/${appId}/public/data/users`;
+            const usersCollection = collection(db, usersCollectionPath);
+
+            async function initializeAuth() {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    console.log("Firebase Auth Initialized. User:", auth.currentUser?.uid);
+                    listenForUserChanges();
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                    document.getElementById('userList').textContent = "Could not connect to the database.";
+                }
             }
 
-            const addUserForm = document.getElementById('addUserForm');
-            const addUserMessage = document.getElementById('addUserMessage');
-            const userList = document.getElementById('userList');
-            const logoutButton = document.getElementById('logoutButton');
-
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-
-            function renderUsers() {
-                userList.innerHTML = '';
-                if(users.length === 0) {
-                    userList.innerHTML = '<p class="text-gray-500">No users found.</p>';
-                    return;
-                }
-                users.forEach((user, index) => {
-                    const userElement = document.createElement('div');
-                    userElement.className = 'flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg';
-                    userElement.innerHTML = `
-                        <span class="font-medium">${user.username}</span>
-                        ${user.username !== 'admin' ? `<button data-index="${index}" class="delete-btn text-sm bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md transition">Delete</button>` : '<span class="text-sm text-gray-400">Admin cannot be deleted</span>'}
-                    `;
-                    userList.appendChild(userElement);
+            const userListEl = document.getElementById('userList');
+            
+            function listenForUserChanges() {
+                onSnapshot(usersCollection, (snapshot) => {
+                    userListEl.innerHTML = ''; // Clear current list
+                    if (snapshot.empty) {
+                        userListEl.innerHTML = '<p class="text-gray-500">No users found.</p>';
+                        return;
+                    }
+                    snapshot.forEach((doc) => {
+                        const user = doc.data();
+                        const userElement = document.createElement('div');
+                        userElement.className = 'flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg';
+                        userElement.innerHTML = `
+                            <span class="font-medium">${user.username}</span>
+                            ${user.username !== 'admin' ? `<button data-id="${doc.id}" class="delete-btn text-sm bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md transition">Delete</button>` : '<span class="text-sm text-gray-400">Admin cannot be deleted</span>'}
+                        `;
+                        userListEl.appendChild(userElement);
+                    });
+                }, (error) => {
+                    console.error("Error listening to user changes:", error);
+                    userListEl.innerHTML = '<p class="text-red-500">Error fetching user list.</p>';
                 });
             }
 
-            addUserForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newUsername = document.getElementById('newUsername').value;
-                const newPassword = document.getElementById('newPassword').value;
+            document.addEventListener('DOMContentLoaded', async () => {
+                await initializeAuth();
 
-                if (users.some(user => user.username === newUsername)) {
-                    addUserMessage.textContent = 'Username already exists.';
-                    addUserMessage.classList.remove('text-green-500');
-                    addUserMessage.classList.add('text-red-500');
-                    return;
-                }
+                const addUserForm = document.getElementById('addUserForm');
+                const addUserMessage = document.getElementById('addUserMessage');
+                const logoutButton = document.getElementById('logoutButton');
 
-                users.push({ username: newUsername, password: newPassword });
-                localStorage.setItem('users', JSON.stringify(users));
-                renderUsers();
-                addUserForm.reset();
-                addUserMessage.textContent = 'User added successfully!';
-                addUserMessage.classList.remove('text-red-500');
-                addUserMessage.classList.add('text-green-500');
+                addUserForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const newUsername = document.getElementById('newUsername').value;
+                    const newPassword = document.getElementById('newPassword').value;
+                    addUserMessage.textContent = '';
+
+                    try {
+                        // Check if username already exists
+                        const q = query(usersCollection, where("username", "==", newUsername));
+                        const snapshot = await getDocs(q);
+                        if (!snapshot.empty) {
+                            addUserMessage.textContent = 'Username already exists.';
+                            addUserMessage.className = 'text-sm text-red-500 mt-2';
+                            return;
+                        }
+
+                        await addDoc(usersCollection, { username: newUsername, password: newPassword });
+                        addUserMessage.textContent = 'User added successfully!';
+                        addUserMessage.className = 'text-sm text-green-500 mt-2';
+                        addUserForm.reset();
+                    } catch (error) {
+                        console.error("Error adding user:", error);
+                        addUserMessage.textContent = 'Failed to add user.';
+                        addUserMessage.className = 'text-sm text-red-500 mt-2';
+                    }
+                });
+                
+                userListEl.addEventListener('click', async (e) => {
+                    if (e.target.classList.contains('delete-btn')) {
+                        const docId = e.target.dataset.id;
+                        if (confirm('Are you sure you want to delete this user?')) {
+                            try {
+                                await deleteDoc(doc(db, usersCollectionPath, docId));
+                            } catch (error) {
+                                console.error("Error deleting user:", error);
+                                alert("Failed to delete user.");
+                            }
+                        }
+                    }
+                });
+
+                logoutButton.addEventListener('click', () => {
+                    sessionStorage.removeItem('loggedInUser');
+                    window.location.href = 'login.html';
+                });
             });
-
-            userList.addEventListener('click', (e) => {
-                if (e.target.classList.contains('delete-btn')) {
-                    const index = e.target.dataset.index;
-                    users.splice(index, 1);
-                    localStorage.setItem('users', JSON.stringify(users));
-                    renderUsers();
-                }
-            });
-
-             logoutButton.addEventListener('click', () => {
-                sessionStorage.removeItem('loggedInUser');
-                window.location.href = 'login.html';
-            });
-
-
-            renderUsers();
-        });
+        }
     </script>
 </body>
 </html>
+
+

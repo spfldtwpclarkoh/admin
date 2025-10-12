@@ -43,36 +43,95 @@
             </form>
         </div>
     </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Create a default admin user if no users exist
-            if (!localStorage.getItem('users')) {
-                const defaultUsers = [{ username: 'admin', password: 'password' }];
-                localStorage.setItem('users', JSON.stringify(defaultUsers));
+        // --- Firebase Initialization ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJkUZK6uSj3baYUmYel5A7BloGkyhhZLM",
+            authDomain: "stfd-web-creds.firebaseapp.com",
+            projectId: "stfd-web-creds",
+            storageBucket: "stfd-web-creds.firebasestorage.app",
+            messagingSenderId: "334765692543",
+            appId: "1:334765692543:web:f154d1402b73f4df63914a",
+            measurementId: "G-1SGKNVV8M7"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('debug'); // Use for debugging firestore issues
+
+        const usersCollectionPath = `/artifacts/${appId}/public/data/users`;
+        const usersCollection = collection(db, usersCollectionPath);
+
+        async function initializeAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Firebase Auth Initialized. User:", auth.currentUser?.uid);
+                await createDefaultAdminIfNeeded();
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                document.getElementById('errorMessage').textContent = "Could not connect to authentication service.";
             }
+        }
+        
+        async function createDefaultAdminIfNeeded() {
+            try {
+                const snapshot = await getDocs(usersCollection);
+                if (snapshot.empty) {
+                    console.log("No users found, creating default admin.");
+                    await addDoc(usersCollection, { username: 'admin', password: 'password' });
+                    console.log("Default admin created.");
+                } else {
+                    console.log(`${snapshot.size} user(s) found.`);
+                }
+            } catch (error) {
+                console.error("Error checking/creating default admin:", error);
+            }
+        }
 
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeAuth();
+            
             const loginForm = document.getElementById('loginForm');
             const errorMessage = document.getElementById('errorMessage');
 
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const username = e.target.username.value;
                 const password = e.target.password.value;
                 errorMessage.textContent = '';
 
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const foundUser = users.find(user => user.username === username && user.password === password);
+                try {
+                    const q = query(usersCollection, 
+                        where("username", "==", username), 
+                        where("password", "==", password)
+                    );
+                    const querySnapshot = await getDocs(q);
 
-                if (foundUser) {
-                    // Use sessionStorage so login is cleared when tab is closed
-                    sessionStorage.setItem('loggedInUser', username);
-                    window.location.href = 'index.html';
-                } else {
-                    errorMessage.textContent = 'Invalid username or password.';
+                    if (!querySnapshot.empty) {
+                        sessionStorage.setItem('loggedInUser', username);
+                        window.location.href = 'index.html';
+                    } else {
+                        errorMessage.textContent = 'Invalid username or password.';
+                    }
+                } catch (error) {
+                    console.error("Login error:", error);
+                    errorMessage.textContent = "An error occurred during login.";
                 }
             });
         });
     </script>
 </body>
 </html>
+
+
